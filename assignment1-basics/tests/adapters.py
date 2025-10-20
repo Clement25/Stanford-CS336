@@ -10,7 +10,6 @@ import torch
 from torch import Tensor
 
 
-
 def run_linear(
     d_in: int,
     d_out: int,
@@ -30,7 +29,11 @@ def run_linear(
         Float[Tensor, "... d_out"]: The transformed output of your linear module.
     """
 
-    raise NotImplementedError
+    from sol_einsum import Linear
+    linear = Linear(d_in, d_out)
+    linear.load_state_dict({"weight": weights})
+    return linear(in_features)
+
 
 
 def run_embedding(
@@ -51,8 +54,11 @@ def run_embedding(
     Returns:
         Float[Tensor, "... d_model"]: Batch of embeddings returned by your Embedding layer.
     """
-
-    raise NotImplementedError
+    from sol_einsum import Embedding
+    embedding = Embedding(vocab_size, d_model)
+    embedding.load_state_dict({"weight": weights})
+    return embedding(token_ids)
+    # raise NotImplementedError
 
 
 def run_swiglu(
