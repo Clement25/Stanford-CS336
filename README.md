@@ -1,2 +1,2 @@
 # Stanford-CS336
-My solution for the Stanford-CS336 course
+[06/26/2026] Complete till 3.5.3
