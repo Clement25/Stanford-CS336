@@ -87,9 +87,13 @@ def run_swiglu(
     from sol_transofrmer import SwiGLU
     swiglu = SwiGLU(d_model, d_ff)
     # You can also manually assign the weights
-    swiglu.w1.weight.data = w1_weight
-    swiglu.w2.weight.data = w2_weight
-    swiglu.w3.weight.data = w3_weight
+    swiglu.load_state_dict(
+        {
+            'w1.weight': w1_weight,
+            'w2.weight': w2_weight,
+            'w3.weight': w3_weight
+        }
+    )
     return swiglu(in_features)
 
 
@@ -111,7 +115,8 @@ def run_scaled_dot_product_attention(
     Returns:
         Float[Tensor, " ... queries d_v"]: Output of SDPA
     """
-    raise NotImplementedError
+    from sol_transofrmer import scaled_dot_product_attn
+    return scaled_dot_product_attn(Q, K, V, mask)
 
 
 def run_multihead_self_attention(
@@ -145,7 +150,17 @@ def run_multihead_self_attention(
         Float[Tensor, " ... sequence_length d_out"]: Tensor with the output of running your optimized, batched multi-headed attention
         implementation with the given QKV projection weights and input features.
     """
-    raise NotImplementedError
+    from sol_transofrmer import MultiHeadSelfAttention
+    mha = MultiHeadSelfAttention(d_model=d_model, num_heads=num_heads)
+    mha.load_state_dict(
+        {
+            'q_proj.weight': q_proj_weight,
+            'k_proj.weight': k_proj_weight,
+            'v_proj.weight': v_proj_weight,
+            'o_proj.weight': o_proj_weight
+        }
+    )
+    return mha(in_features)
 
 
 def run_multihead_self_attention_with_rope(
@@ -185,7 +200,18 @@ def run_multihead_self_attention_with_rope(
         Float[Tensor, " ... sequence_length d_out"]: Tensor with the output of running your optimized, batched multi-headed attention
         implementation with the given QKV projection weights and input features.
     """
-    raise NotImplementedError
+    from sol_transofrmer import MultiHeadSelfAttentionWithRoPE
+    mha = MultiHeadSelfAttentionWithRoPE(theta=theta, d_model=d_model, num_heads=num_heads, max_seq_len=max_seq_len)
+    mha.load_state_dict(
+        {
+            'q_proj.weight': q_proj_weight,
+            'k_proj.weight': k_proj_weight,
+            'v_proj.weight': v_proj_weight,
+            'output_proj.weight': o_proj_weight
+        },
+        strict=False
+    )
+    return mha(in_features, token_positions)
 
 
 def run_rope(
@@ -283,7 +309,10 @@ def run_transformer_block(
         Float[Tensor, "batch sequence_length d_model"] Tensor with the output of
         running the Transformer block on the input features while using RoPE.
     """
-    raise NotImplementedError
+    from sol_transofrmer import TransformerBlock
+    tf_block = TransformerBlock(d_model, num_heads, d_ff, max_seq_len, theta)
+    tf_block.load_state_dict(weights, strict=False)
+    return tf_block(in_features)
 
 
 def run_transformer_lm(
@@ -365,7 +394,10 @@ def run_transformer_lm(
         Float[Tensor, "batch_size sequence_length vocab_size"]: Tensor with the predicted unnormalized
         next-word distribution for each token.
     """
-    raise NotImplementedError
+    from sol_transofrmer import TransformerLM
+    tf_lm = TransformerLM(vocab_size, d_model, num_heads, d_ff, context_length, rope_theta, num_layers)
+    tf_lm.load_state_dict(weights, strict=False)
+    return tf_lm(in_indices)
 
 
 def run_rmsnorm(
