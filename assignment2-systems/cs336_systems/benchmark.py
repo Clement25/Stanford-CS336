@@ -16,8 +16,8 @@ args = parser.parse_args()
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 BSZ=2
-VOCAB_SIZE=20000
-CTX_LEN=2048
+VOCAB_SIZE=10000
+CTX_LEN=1024
 
 w=5     # warm up runs
 nrun=10
@@ -81,7 +81,7 @@ def get_model_hps(model_type):
 
 if __name__ == "__main__":
     if args.model_size == 'all':
-        for model_size in ('small', 'medium', 'large', 'xl', '10B'):
+        for model_size in ('small', 'medium', 'large', 'xl'):
             model_hps = get_model_hps(model_size)
             benchmarking(benchmark_stats[model_size], **model_hps)
     else:
